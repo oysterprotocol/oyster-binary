@@ -1,1 +1,1 @@
-"# oyster-binary" 
+This repo will hold our cross-compiled binary of shared functionality.
