@@ -1,3 +1,8 @@
 **/*.xml
+*.xml
 **/*.iml
+*.iml
 *.env
+.idea/**/*
+.idea/*
+.idea
