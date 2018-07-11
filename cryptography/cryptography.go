@@ -1,4 +1,4 @@
-package cryptography
+package oysterCrypto
 
 import (
 	"crypto/aes"
@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"hash"
 
-	"github.com/oysterprotocol/oyster-binary/utils"
+	"github.com/oysterprotocol/oyster-binary/errors"
 )
 
 /*Encrypt accepts a key, unencrypted secret, and nonce, and should return the encrypted
@@ -22,7 +22,7 @@ result as a byte array*/
 func Decrypt(key string, encryptedSecret string, nonce string) ([]byte, error) {
 	nonceInBytes, secretInBytes, gcm, prepErr := prepareNonceSecretAndGCM(key, encryptedSecret, nonce)
 	data, openErr := gcm.Open(nil, nonceInBytes, secretInBytes, nil)
-	err := utils.ReturnFirstError([]error{prepErr, openErr})
+	err := oysterErrors.ReturnFirstError([]error{prepErr, openErr})
 	return data, err
 }
 
@@ -32,7 +32,7 @@ func prepareNonceSecretAndGCM(key string, secret string, nonce string) ([]byte, 
 	block, createCipherErr := aes.NewCipher(keyInBytes)
 	gcm, newGCMErr := cipher.NewGCM(block)
 	nonceInBytes, nonceToBytesErr := hex.DecodeString(nonce[0 : 2*gcm.NonceSize()])
-	err := utils.ReturnFirstError([]error{keyDecodeErr, secretDecodeErr, createCipherErr, newGCMErr, nonceToBytesErr})
+	err := oysterErrors.ReturnFirstError([]error{keyDecodeErr, secretDecodeErr, createCipherErr, newGCMErr, nonceToBytesErr})
 	return nonceInBytes, secretInBytes, gcm, err
 }
 
@@ -43,11 +43,12 @@ func HashString(str string, shaAlg hash.Hash) (string, error) {
 	return hashString, err
 }
 
-/*HashHex receives a hex string and hashes it according to the hashing algorithm passed in, and should return a string*/
-func HashHex(hexStr string, shaAlg hash.Hash) (string, error) {
+/*HashBytesFromHex receives a hex string, converts it to bytes and hashes it according
+to the hashing algorithm passed in, and should return a string*/
+func HashBytesFromHex(hexStr string, shaAlg hash.Hash) (string, error) {
 	input, decodeErr := hex.DecodeString(hexStr)
 	_, writeErr := shaAlg.Write(input)
 	hashString := hex.EncodeToString(shaAlg.Sum(nil))
-	err := utils.ReturnFirstError([]error{decodeErr, writeErr})
+	err := oysterErrors.ReturnFirstError([]error{decodeErr, writeErr})
 	return hashString, err
 }
